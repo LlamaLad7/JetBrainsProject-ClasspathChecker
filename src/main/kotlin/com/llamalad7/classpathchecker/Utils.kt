@@ -1,5 +1,9 @@
 package com.llamalad7.classpathchecker
 
+import org.objectweb.asm.Opcodes
+
+const val ASM_VERSION = Opcodes.ASM9
+
 inline fun <T : AutoCloseable, R> Sequence<T>.useAll(routine: (List<T>) -> R): R {
     val toClose = mutableListOf<T>()
     try {
