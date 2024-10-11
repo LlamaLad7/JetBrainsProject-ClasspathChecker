@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.20"
+    id("com.gradleup.shadow") version "8.3.3"
+    application
 }
 
 group = "com.llamalad7"
@@ -27,4 +29,14 @@ tasks.test {
 
 kotlin {
     jvmToolchain(11)
+}
+
+application {
+    mainClass = "com.llamalad7.classpathchecker.ClasspathCheckerKt"
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
 }
