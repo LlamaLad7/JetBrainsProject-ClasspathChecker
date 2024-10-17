@@ -6,7 +6,7 @@ import org.objectweb.asm.commons.Remapper
 import java.io.InputStream
 import java.util.jar.JarFile
 
-class ClasspathModel(private val jars: List<JarFile>) {
+class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boolean) {
     private val visiting = mutableSetOf<ClassName>()
 
     // A ClassRemapper is a convenient way to visit every class reference in the given class.
@@ -28,21 +28,34 @@ class ClasspathModel(private val jars: List<JarFile>) {
         }
         if (ClassLoader.getPlatformClassLoader().getResource(name.fileName) != null) {
             // This is a JDK class, don't bother scanning it, we can assume the JDK is complete
+            log { "$name is built-in" }
             return
         }
         ClassReader(getClassStream(name)).accept(scanner, 0)
     }
 
     private fun getClassStream(name: ClassName): InputStream {
-        return jars.firstNotNullOfOrNull { jar ->
+        val stream = jars.firstNotNullOfOrNull { jar ->
             jar.getEntry(name.fileName)?.let { jar.getInputStream(it) }
-        } ?: throw MissingClassException
+        }
+        if (stream == null) {
+            log { "$name is missing" }
+            throw MissingClassException
+        }
+        log { "$name is present" }
+        return stream
     }
 
     private inner class ScanningRemapper : Remapper() {
         override fun map(internalName: String): String {
             scanClass(ClassName(internalName))
             return super.map(internalName)
+        }
+    }
+
+    private inline fun log(message: () -> String) {
+        if (verbose) {
+            println(message())
         }
     }
 }
