@@ -28,7 +28,7 @@ class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boole
         }
         if (ClassLoader.getPlatformClassLoader().getResource(name.fileName) != null) {
             // This is a JDK class, don't bother scanning it, we can assume the JDK is complete
-            log { "$name is built-in" }
+            log { "$name is present in current JDK" }
             return
         }
         ClassReader(getClassStream(name)).accept(scanner, 0)
@@ -37,12 +37,12 @@ class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boole
     private fun getClassStream(name: ClassName): InputStream {
         val stream = jars.firstNotNullOfOrNull { jar ->
             jar.getEntry(name.fileName)?.let { jar.getInputStream(it) }
+                ?.also { log { "$name is present in ${jar.name}" } }
         }
         if (stream == null) {
             log { "$name is missing" }
             throw MissingClassException
         }
-        log { "$name is present" }
         return stream
     }
 

@@ -25,6 +25,7 @@ the [unit tests](https://github.com/LlamaLad7/JetBrainsProject-ClasspathChecker/
 By default, the program will output a single `true`/`false` value indicating whether the classpath is complete.
 
 E.g.
+
 ```bash
 $ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar
 false
@@ -34,13 +35,15 @@ If you enable `--verbose`, more information will be printed, e.g.:
 
 ```bash
 $ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar --verbose
-com.jetbrains.internship2024.ClassB is present
-java.lang.Object is built-in
-java.lang.String is built-in
-java.lang.Exception is built-in
+com.jetbrains.internship2024.ClassB is present in test-data/build/libs/ModuleB-1.0.jar
+java.lang.Object is present in current JDK
+java.lang.String is present in current JDK
+java.lang.Exception is present in current JDK
 com.jetbrains.internship2024.ClassA is missing
 false
 ```
+
+Note that the search will stop as soon as any missing class is found.
 
 ## Implementation
 
