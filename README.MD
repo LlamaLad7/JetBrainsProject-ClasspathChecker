@@ -54,6 +54,8 @@ each class file. Unfortunately we need to provide a backing `DummyClassVisitor` 
 implementations of each sub-visitor (`FieldVisitor`, `MethodVisitor`, etc), otherwise the remapper will skip some
 information.
 
+We then continue to scan the referenced classes in a depth-first manner, since this is the simplest implementation.
+
 We also need to consider built-in JDK classes, which we detect by looking at the resources available via the the current
 `ClassLoader.getPlatformClassLoader()`. We do not scan JDK classes since we can assume the JDK to be complete, but we
 need to check that the classes actually exist in case of e.g. mismatching JDK versions.
@@ -63,3 +65,6 @@ need to check that the classes actually exist in case of e.g. mismatching JDK ve
 - In practice there are some references which the JVM may not look at, e.g. invisible annotations, but
   the specifics of this will likely depend on the JVM implementation and our overall goal, e.g. we may care about the
   compile classpath rather than the runtime classpath.
+- If our goal was to find all missing dependencies then instead of terminating when we find a single missing class,
+  we would want to accumulate all missing classes and possibly group their packages to display to the user. Given the 
+  spec requires only a single boolean output, I favoured the early exiting for this implementation.
