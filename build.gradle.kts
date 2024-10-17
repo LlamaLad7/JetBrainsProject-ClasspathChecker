@@ -16,6 +16,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.github.ajalt.clikt:clikt-core:5.0.1")
     implementation("org.ow2.asm:asm-commons:9.7.1")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter")

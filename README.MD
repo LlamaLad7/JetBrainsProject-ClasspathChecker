@@ -6,30 +6,34 @@ dependencies of the main class are present.
 ## Usage
 
 ```bash
-./gradlew run --args="path.to.MainClass path/to/jar1.jar path/to/jar2.jar ..."
-```
+$ ./gradlew build
+$ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar --help
+Usage: java -jar classpath-checker.jar [<options>] <mainclass> [<jars>]...
 
-or
+Options:
+  --verbose   Enables detailed logging of all considered classes
+  -h, --help  Show this message and exit
 
-```bash
-./gradlew build
-java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar path.to.MainClass path/to/jar1.jar path/to/jar2.jar ...
+Arguments:
+  <mainclass>  Fully-qualified main class name
+  <jars>       JAR files which make up the classpath you want to check
 ```
 
 See also
 the [unit tests](https://github.com/LlamaLad7/JetBrainsProject-ClasspathChecker/blob/main/src/test/kotlin/com/llamalad7/classpathchecker/tests/ClasspathCheckerTests.kt).
 
-The program will output a single `true`/`false` value indicating whether the classpath is complete.
+By default, the program will output a single `true`/`false` value indicating whether the classpath is complete.
 
-You can optionally enable verbose logging by setting `-Dverbose=true`. E.g.:
+E.g.
+```bash
+$ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar
+false
+```
+
+If you enable `--verbose`, more information will be printed, e.g.:
 
 ```bash
-java -Dverbose=true -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar
-```
-
-will print:
-
-```
+$ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar --verbose
 com.jetbrains.internship2024.ClassB is present
 java.lang.Object is built-in
 java.lang.String is built-in
@@ -39,6 +43,8 @@ false
 ```
 
 ## Implementation
+
+For the CLI I use [Clikt](https://ajalt.github.io/clikt/), and for the implementation I use [ASM](https://asm.ow2.io/).
 
 We delegate most of the work to an ASM `ClassRemapper`, which conveniently allows us to visit every type reference in
 each class file. Unfortunately we need to provide a backing `DummyClassVisitor` implementation which provides
