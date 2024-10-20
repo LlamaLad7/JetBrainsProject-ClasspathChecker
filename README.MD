@@ -48,6 +48,14 @@ Note that the search will stop as soon as any missing class is found.
 ## Implementation
 
 For the CLI I use [Clikt](https://ajalt.github.io/clikt/), and for the implementation I use [ASM](https://asm.ow2.io/).
+> Unfortunately, since ASM abstracts away the constant pool and attributes, we end up needing to search more deeply than
+> is strictly necessary. There are other bytecode libraries, like [BCEL](https://github.com/apache/commons-bcel), which
+> provide direct access to the constant pool, however unfortunately this would require a lot of extra manual work
+> because a lot of bytecode structures store type names inside raw `CONSTANT_Utf8_info`s, which we can't assume contain
+> actual type information, so we would need to check a lot of different `Attribute`s ourselves to find the relevant type
+> references. The performance of this approach would nonetheless be much better than we get with ASM, but I deemed the
+> manual workload to be too much for this test
+> task.
 
 We delegate most of the work to an ASM `ClassRemapper`, which conveniently allows us to visit every type reference in
 each class file. Unfortunately we need to provide a backing `DummyClassVisitor` implementation which provides
@@ -66,5 +74,5 @@ need to check that the classes actually exist in case of e.g. mismatching JDK ve
   the specifics of this will likely depend on the JVM implementation and our overall goal, e.g. we may care about the
   compile classpath rather than the runtime classpath.
 - If our goal was to find all missing dependencies then instead of terminating when we find a single missing class,
-  we would want to accumulate all missing classes and possibly group their packages to display to the user. Given the 
+  we would want to accumulate all missing classes and possibly group their packages to display to the user. Given the
   spec requires only a single boolean output, I favoured the early exiting for this implementation.
