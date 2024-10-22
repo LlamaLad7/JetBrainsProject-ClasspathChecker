@@ -7,23 +7,28 @@ import java.io.InputStream
 import java.util.jar.JarFile
 
 class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boolean) {
-    private val visiting = mutableSetOf<ClassName>()
+    private val seen = mutableSetOf<ClassName>()
+    private val toVisit = ArrayDeque<ClassReader>()
 
     // A ClassRemapper is a convenient way to visit every class reference in the given class.
     // Unfortunately, it needs a backing visitor which provides all possible sub-visitors (MethodVisitor, etc).
     private val scanner = ClassRemapper(DummyClassVisitor, ScanningRemapper())
 
     fun canRun(mainClass: ClassName): Boolean {
-        try {
-            scanClass(mainClass)
-            return true
-        } catch (_: MissingClassException) {
-            return false
+        enqueueClass(mainClass)
+        while (toVisit.isNotEmpty()) {
+            val nextClass = toVisit.removeFirst()
+            try {
+                nextClass.accept(scanner, 0)
+            } catch (_: MissingClassException) {
+                return false
+            }
         }
+        return true
     }
 
-    private fun scanClass(name: ClassName) {
-        if (!visiting.add(name)) {
+    private fun enqueueClass(name: ClassName) {
+        if (!seen.add(name)) {
             return
         }
         if (ClassLoader.getPlatformClassLoader().getResource(name.fileName) != null) {
@@ -31,7 +36,7 @@ class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boole
             log { "$name is present in current JDK" }
             return
         }
-        ClassReader(getClassStream(name)).accept(scanner, 0)
+        toVisit.addLast(ClassReader(getClassStream(name)))
     }
 
     private fun getClassStream(name: ClassName): InputStream {
@@ -48,7 +53,7 @@ class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boole
 
     private inner class ScanningRemapper : Remapper() {
         override fun map(internalName: String): String {
-            scanClass(ClassName(internalName))
+            enqueueClass(ClassName(internalName))
             return super.map(internalName)
         }
     }

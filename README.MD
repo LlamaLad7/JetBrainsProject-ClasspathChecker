@@ -62,7 +62,9 @@ each class file. Unfortunately we need to provide a backing `DummyClassVisitor` 
 implementations of each sub-visitor (`FieldVisitor`, `MethodVisitor`, etc), otherwise the remapper will skip some
 information.
 
-We then continue to scan the referenced classes in a depth-first manner, since this is the simplest implementation.
+We then continue to scan the referenced classes using BFS, since this is likely to reduce the number of steps before
+finding a missing class. With DFS, we risk for example finding a present, self-contained library and exploring the 
+entire thing before continuing the search through the program classes.
 
 We also need to consider built-in JDK classes, which we detect by looking at the resources available via the the current
 `ClassLoader.getPlatformClassLoader()`. We do not scan JDK classes since we can assume the JDK to be complete, but we
@@ -76,3 +78,5 @@ need to check that the classes actually exist in case of e.g. mismatching JDK ve
 - If our goal was to find all missing dependencies then instead of terminating when we find a single missing class,
   we would want to accumulate all missing classes and possibly group their packages to display to the user. Given the
   spec requires only a single boolean output, I favoured the early exiting for this implementation.
+- We could optimize the search for trying to find missing classes by, for example, favouring classes which are in the 
+  queue and have packages that we have not yet seen.
