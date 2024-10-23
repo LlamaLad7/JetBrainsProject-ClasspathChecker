@@ -8,6 +8,8 @@ dependencies of the main class are present.
 ```bash
 $ ./gradlew build
 $ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar --help
+```
+```
 Usage: java -jar classpath-checker.jar [<options>] <mainclass> [<jars>]...
 
 Options:
@@ -28,6 +30,8 @@ E.g.
 
 ```bash
 $ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar
+```
+```
 false
 ```
 
@@ -35,6 +39,8 @@ If you enable `--verbose`, more information will be printed, e.g.:
 
 ```bash
 $ java -jar build/libs/classpath-checker-1.0-SNAPSHOT-all.jar com.jetbrains.internship2024.ClassB test-data/build/libs/ModuleB-1.0.jar --verbose
+```
+```
 com.jetbrains.internship2024.ClassB is present in test-data/build/libs/ModuleB-1.0.jar
 java.lang.Object is present in current JDK
 java.lang.String is present in current JDK
