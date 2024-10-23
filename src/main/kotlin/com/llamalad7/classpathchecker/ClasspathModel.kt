@@ -21,6 +21,7 @@ class ClasspathModel(private val jars: List<JarFile>, private val verbose: Boole
             try {
                 nextClass.accept(scanner, 0)
             } catch (_: MissingClassException) {
+                toVisit.clear()
                 return false
             }
         }
